@@ -65,12 +65,6 @@ def update_root():
     pygame.display.update()
 
 
-def main():
-    check_events()
-    update_root()
-    clock.tick(FPS)
-
-
 grid_posx, grid_posy = OFFSET, OFFSET
 if __name__ == "__main__":
     for i in range(0, Y_SQUARES):
@@ -80,4 +74,6 @@ if __name__ == "__main__":
         grid_posy += SQR_SIZE + OFFSET
         grid_posx = OFFSET
     while True:
-        main()
+        check_events()
+        update_root()
+        clock.tick(FPS)
