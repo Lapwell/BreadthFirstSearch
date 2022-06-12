@@ -6,13 +6,13 @@ pygame.init()
 WHITE = 255, 255, 255
 BLACK = 0, 0, 0
 GREY = 64, 64, 64
-RED = 255, 0, 0
-GREEN = 0, 255, 0
-BLUE = 0, 0, 255
+RED = 200, 0, 0
+GREEN = 0, 200, 0
+BLUE = 0, 0, 200
 
 OFFSET = 2  # Offset is the thickness of the black lines.
 SQR_SIZE = 20  # The size of the squares in the grid.
-# print("Enter 'n' for default value.")
+print("Enter 'n' for default value.\nLeft-click for walls, right-click for start, mousewheel-click for end.")
 # X_SQUARES, Y_SQUARES = input('Input X amount:'), input("Input Y amount:")  # The amount of squares in the x-axis and y-axis.
 X_SQUARES, Y_SQUARES = 'n', 'n'
 if X_SQUARES or Y_SQUARES == 'n':
@@ -34,11 +34,35 @@ class GridSquare:
         self.rect = pygame.Rect(posx, posy, SQR_SIZE, SQR_SIZE)
 
 
-def mouse_click():
+def mouse_click(square_type):
+    global current_start
+    global current_end
     for item in grid:
-        if item.rect.collidepoint(pygame.mouse.get_pos()):
+        if item.rect.collidepoint(pygame.mouse.get_pos()) and square_type == 'wall':
+            if item.colour != WHITE:
+                if item.colour == GREEN:
+                    current_start = blank_square
+                    print('green')
+                elif item.colour == RED:
+                    current_end = blank_square
+                    print('red')
+                else:
+                    item.colour = WHITE
+                    print('white')
+                    continue
             item.colour = GREY
-            print('Collide true', pygame.mouse.get_pos())
+        elif item.rect.collidepoint(pygame.mouse.get_pos()) and square_type == 'start':
+            if item.colour == RED:
+                current_end = blank_square
+            current_start.colour = WHITE
+            item.colour = GREEN
+            current_start = item
+        elif item.rect.collidepoint(pygame.mouse.get_pos()) and square_type == 'end':
+            if item.colour == GREEN:
+                current_start = blank_square
+            current_end.colour = WHITE
+            item.colour = RED
+            current_end = item
 
 
 def fps_counter():
@@ -48,13 +72,16 @@ def fps_counter():
 
 
 def check_events():
-    keys = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == pygame.MOUSEBUTTONUP and pygame.mouse.get_focused() and event.button == 1:
-            mouse_click()
+        if event.type == pygame.MOUSEBUTTONUP and pygame.mouse.get_focused() and event.button == 1:  # This statement is for placing the walls.
+            mouse_click('wall')
+        if event.type == pygame.MOUSEBUTTONUP and pygame.mouse.get_focused() and event.button == 2:  # This is for placing the end square.
+            mouse_click('end')
+        if event.type == pygame.MOUSEBUTTONUP and pygame.mouse.get_focused() and event.button == 3:  # This statement is for placing the start square.
+            mouse_click('start')
 
 
 def update_root():
@@ -67,6 +94,9 @@ def update_root():
 
 grid_posx, grid_posy = OFFSET, OFFSET
 if __name__ == "__main__":
+    blank_square = GridSquare(0, 0, WHITE)
+    current_start = blank_square  # This is to store where the start square is on the grid.
+    current_end = blank_square  # This is to store the end square coords on the grid.
     for i in range(0, Y_SQUARES):
         for y in range(0, X_SQUARES):
             grid.append(GridSquare(grid_posx, grid_posy, WHITE))
